@@ -1,8 +1,10 @@
 //! Solutions to the puzzles.
 
-pub const SOLUTIONS: [[fn(core::str::Lines<'_>, bool) -> Result<String, Box<dyn std::error::Error>>; 2]; 1] = [[day1p1, day1p2]];
+pub const SOLUTIONS: [[fn(&str, bool) -> Result<String, Box<dyn std::error::Error>>; 2]; 2] =
+    [[day1p1, day1p2], [day2p1, day2p2]];
 
-fn day1p1(input: core::str::Lines<'_>, test_mode: bool) -> Result<String, Box<dyn std::error::Error>> {
+fn day1p1(text: &str, test_mode: bool) -> Result<String, Box<dyn std::error::Error>> {
+    let input = text.lines();
     let mut state = 50u32;
     let mut password = 0u32;
 
@@ -17,15 +19,10 @@ fn day1p1(input: core::str::Lines<'_>, test_mode: bool) -> Result<String, Box<dy
         let dir_left = match movement.chars().next().unwrap() {
             'L' => true,
             'R' => false,
-            _ => unreachable!()
+            _ => unreachable!(),
         };
 
-        let num: i32 = if dir_left {
-            -(num as i32)
-        } else {
-            num as i32
-        };
-        
+        let num: i32 = if dir_left { -(num as i32) } else { num as i32 };
 
         if let Some(out) = state.checked_add_signed(num) {
             if out <= 99 {
@@ -55,7 +52,8 @@ fn day1p1(input: core::str::Lines<'_>, test_mode: bool) -> Result<String, Box<dy
     Ok(format!("password: {password}"))
 }
 
-fn day1p2(input: core::str::Lines<'_>, test_mode: bool) -> Result<String, Box<dyn std::error::Error>> {
+fn day1p2(text: &str, test_mode: bool) -> Result<String, Box<dyn std::error::Error>> {
+    let input = text.lines();
     let mut state = 50u32;
     let mut password = 0u32;
 
@@ -70,7 +68,7 @@ fn day1p2(input: core::str::Lines<'_>, test_mode: bool) -> Result<String, Box<dy
         let dir_left = match movement.chars().next().unwrap() {
             'L' => true,
             'R' => false,
-            _ => unreachable!()
+            _ => unreachable!(),
         };
 
         for _ in 0..num {
@@ -96,4 +94,60 @@ fn day1p2(input: core::str::Lines<'_>, test_mode: bool) -> Result<String, Box<dy
         }
     }
     Ok(format!("password: {password}"))
+}
+
+fn day2p1(text: &str, _test_mode: bool) -> Result<String, Box<dyn std::error::Error>> {
+    let mut output = 0u64;
+    for range in text.split(',') {
+        let (start, end) = range.split_once('-').unwrap();
+        let (start, end): (u64, u64) = (start.parse()?, end.parse()?);
+
+        for i in start..=end {
+            let s = i.to_string();
+            let split = s.split_at(s.len() / 2);
+            if split.0 == split.1 {
+                output += i;
+            }
+        }
+    }
+
+    Ok(format!("All added up IDs: {output}"))
+}
+
+fn day2p2(text: &str, test_mode: bool) -> Result<String, Box<dyn std::error::Error>> {
+    let mut output = 0u64;
+    for range in text.split(',') {
+        let (start, end) = range.split_once('-').unwrap();
+        let (start, end): (u64, u64) = (start.parse()?, end.parse()?);
+
+        for i in start..=end {
+            let s = i.to_string();
+            for repts in 2..=s.len() {
+                if s.len() % repts > 0 {
+                    if test_mode {
+                        eprintln!("no match on repetition {repts} for number {i}: does not divide")
+                    }
+                    continue;
+                }
+                let mut splits = Vec::new();
+                for r in 0..repts {
+                    splits.push(&s[((s.len() / repts) * r)..((s.len() / repts) * (r + 1))]);
+                }
+
+                if splits.iter().all(|v| *v == splits[0]) {
+                    if test_mode {
+                        eprintln!("match on repetition {repts} for number {i}")
+                    }
+                    output += i;
+                    break;
+                } else {
+                    if test_mode {
+                        eprintln!("no match on repetition {repts} for number {i}: not equal")
+                    }
+                }
+            }
+        }
+    }
+
+    Ok(format!("All added up IDs: {output}"))
 }

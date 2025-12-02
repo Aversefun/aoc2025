@@ -13,13 +13,19 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let (day, part) = args[1].strip_prefix("d").unwrap().split_once("p").unwrap();
     let (day, part): (u8, u8) = (day.parse().unwrap(), part.parse().unwrap());
 
-    let file = std::fs::read_to_string(format!("d{day}-input{}.txt", if test_mode {
-        format!("-p{part}test")
-    } else {
-        String::new()
-    }))?;
+    let file = std::fs::read_to_string(format!(
+        "d{day}-input{}.txt",
+        if test_mode {
+            format!("-p{part}test")
+        } else {
+            String::new()
+        }
+    ))?;
 
-    println!("{}", SOLUTIONS[day as usize - 1][part as usize - 1](file.lines(), test_mode)?);
+    println!(
+        "{}",
+        SOLUTIONS[day as usize - 1][part as usize - 1](&file, test_mode)?
+    );
 
     Ok(())
 }
